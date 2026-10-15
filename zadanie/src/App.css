@@ -1,0 +1,17 @@
+.filmy,.Ksiazki,.Muzyka {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.film,.Ksiazka,.Utwor {
+    text-align: center;
+    width: 250px;
+}
+
+img {
+    width: 100%;
+    height: 400px ;
+}
