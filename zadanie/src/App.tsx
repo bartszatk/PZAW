@@ -129,48 +129,66 @@ function WhichYear({ year }: WhichYearProps) {
 
 function Film({ okladka, tytul, rokProdukcji, rating }: FilmProps) {
   return (
-    <div className="film">
-      <img src={okladka} alt={tytul} />
-      <h2>{tytul}</h2>
-      <WhichYear year={rokProdukcji} />
-      <p>Ocena: {rating}/10</p>
-      {rating >= 8 && <p className="etykieta">Polecany</p>}
+    <div className="col">
+      <div className="card h-100 shadow-sm">
+        <img src={okladka} className="card-img-top" alt={tytul} />
+        <div className="card-body">
+          <h5 className="card-title">{tytul}</h5>
+          <WhichYear year={rokProdukcji} />
+          <p className="card-text mb-2">Ocena: {rating}/10</p>
+          {rating >= 8 && <span className="badge bg-success">Polecany</span>}
+        </div>
+      </div>
     </div>
   );
 }
 
+
 function Ksiazka({ okladka, tytul, rokWydania, liczbaStron }: KsiazkaProps) {
   return (
-    <div className="Ksiazka">
-      <img src={okladka} alt={tytul} />
-      <h2>{tytul}</h2>
-      <p>Rok wydania: {rokWydania}</p>
-      <p>Liczba stron: {liczbaStron}</p>
-      {rokWydania < 2000 && <p className="etykieta">Klasyka</p>}
+    <div className="col">
+      <div className="card h-100 shadow-sm">
+        <img src={okladka} className="card-img-top" alt={tytul} />
+        <div className="card-body">
+          <h5 className="card-title">{tytul}</h5>
+          <p className="card-text mb-1 text-muted">Rok wydania: {rokWydania}</p>
+          <p className="card-text mb-2">Liczba stron: {liczbaStron}</p>
+          {rokWydania < 2000 && <span className="badge bg-secondary">Klasyka</span>}
+        </div>
+      </div>
     </div>
   );
 }
 
 function Muzyka({ okladka, nazwaAlbumu, nazwaZespolu, gatunek, rokWydania, listaPiosenek }: MuzykaProps) {
   return (
-    <div className="Utwor">
-      <img src={okladka} alt={nazwaAlbumu} />
-      <h2>{nazwaAlbumu}</h2>
-      <h3>{nazwaZespolu}</h3>
-      <p>Gatunek: {gatunek}</p>
-      <p>Rok wydania: {rokWydania}</p>
-      <h4>Lista piosenek:</h4>
-      {listaPiosenek.length === 0 ? (
-        <p>Brak utworów</p>
-      ):(
-      <ul>
-        {listaPiosenek.map((piosenka, index) => (
-          <li key={index}>
-            {piosenka.tytul} ({piosenka.czasTrwania})
-          </li>
-        ))}
-      </ul>
-      )}
+    <div className="col">
+      <div className="card h-100 shadow-sm">
+        <img src={okladka} className="card-img-top" alt={nazwaAlbumu} />
+        <div className="card-body">
+          <h5 className="card-title">{nazwaAlbumu}</h5>
+          <h6 className="card-subtitle mb-2 text-muted">{nazwaZespolu}</h6>
+          <p className="card-text mb-1">Gatunek: {gatunek}</p>
+          <p className="card-text mb-3">Rok wydania: {rokWydania}</p>
+          <h6 className="text-secondary mb-2">Lista piosenek:</h6>
+          {listaPiosenek.length === 0 ? (
+            <div className="alert alert-warning py-2 mb-0" role="alert">
+              Brak utworów
+            </div>
+          ) : (
+            <table className="table table-striped table-hover mb-0">
+              <tbody>
+                {listaPiosenek.map((piosenka, index) => (
+                  <tr key={index}>
+                    <td>{piosenka.tytul}</td>
+                    <td className="text-end">{piosenka.czasTrwania}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -184,16 +202,19 @@ function Section({ title, children }: SectionProps) {
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div>
-      <h1 onClick={() => setIsOpen(!isOpen)} style={{ cursor: "pointer", userSelect: "none" }}>
+    <div className="mb-4">
+      <h2 
+        onClick={() => setIsOpen(!isOpen)} 
+        style={{ cursor: "pointer", userSelect: "none" }} 
+        className="h4 mb-3 text-dark"
+      >
         {isOpen ? "▾ " : "▸ "}
         {title}
-      </h1>
+      </h2>
       {isOpen && children}
     </div>
   );
 }
-
 
 function App() {
   const filmyPo2010 = filmy.filter((film) => film.rokProdukcji > 2010);
@@ -208,9 +229,9 @@ function App() {
   }
 });
   return (
-    <div className="App">
+    <div className="container my-4">
       <Section title="Moje filmy">
-        <div className="filmy">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {filmy.map((film) => (
             <Film
               key={film.id}
@@ -223,7 +244,7 @@ function App() {
         </div>
       </Section>
       <Section title="Filmy wydane po 2010 roku">
-        <div className="filmy">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {filmyPo2010.map((film) => (
             <Film
               key={film.id}
@@ -236,7 +257,7 @@ function App() {
         </div>
       </Section>
         <Section title="Moje książki od A do Z">
-        <div className="Ksiazki">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {ksiazki.map((ksiazka) => (
             <Ksiazka
               key={ksiazka.id}
@@ -249,7 +270,7 @@ function App() {
         </div>
         </Section>
         <Section title="Książki posortowane od najnowszej">
-        <div className="Ksiazki">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {ksiazkiOdNajnowszej.map((ksiazka) => (
             <Ksiazka
               key={ksiazka.id}
@@ -262,7 +283,7 @@ function App() {
         </div>
         </Section>
         <Section title="Moja muzyka">
-        <div className="Muzyka">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           {muzyka.map((album) => (
             <Muzyka
               key={album.id}
@@ -279,7 +300,7 @@ function App() {
 
       
         <Section title="Album z największą liczbą utworów">
-        <div className="Muzyka">
+        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
           <Muzyka
             key={albumNajwiecejUtworow.id}
             okladka={albumNajwiecejUtworow.okladka}
