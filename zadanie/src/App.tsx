@@ -128,8 +128,15 @@ function WhichYear({ year }: WhichYearProps) {
 }
 
 function Film({ okladka, tytul, rokProdukcji, rating }: FilmProps) {
+  const handleCardClick = () => {
+    console.log(`Wybrano film: ${tytul}`);
+  };
+  const handleDetailsClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    console.log(`Pokaż szczegóły dla ${tytul}`);
+  };
   return (
-    <div className="col">
+    <div className="col" onClick={handleCardClick} style={{ cursor: "pointer" }}>
       <div className="card h-100 shadow-sm">
         <img src={okladka} className="card-img-top" alt={tytul} />
         <div className="card-body">
@@ -137,6 +144,11 @@ function Film({ okladka, tytul, rokProdukcji, rating }: FilmProps) {
           <WhichYear year={rokProdukcji} />
           <p className="card-text mb-2">Ocena: {rating}/10</p>
           {rating >= 8 && <span className="badge bg-success">Polecany</span>}
+          <div className="mt-2">
+            <button className="btn btn-primary btn-sm" onClick={handleDetailsClick}>
+              Pokaż szczegóły
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -161,6 +173,10 @@ function Ksiazka({ okladka, tytul, rokWydania, liczbaStron }: KsiazkaProps) {
 }
 
 function Muzyka({ okladka, nazwaAlbumu, nazwaZespolu, gatunek, rokWydania, listaPiosenek }: MuzykaProps) {
+  function handleSongClick(tytulPiosenki: string) {
+    console.log(`Wybrano utwór: ${tytulPiosenki} z ${nazwaAlbumu}`);
+  }
+
   return (
     <div className="col">
       <div className="card h-100 shadow-sm">
@@ -178,8 +194,12 @@ function Muzyka({ okladka, nazwaAlbumu, nazwaZespolu, gatunek, rokWydania, lista
           ) : (
             <table className="table table-striped table-hover mb-0">
               <tbody>
-                {listaPiosenek.map((piosenka, index) => (
-                  <tr key={index}>
+                {listaPiosenek.map((piosenka, index) => ( 
+                  <tr 
+                    key={index} 
+                    onClick={() => handleSongClick(piosenka.tytul)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <td>{piosenka.tytul}</td>
                     <td className="text-end">{piosenka.czasTrwania}</td>
                   </tr>
@@ -217,10 +237,29 @@ function Section({ title, children }: SectionProps) {
 }
 
 function App() {
+  const [movieSearch, setMovieSearch] = useState("");
+  const [bookSearch, setBookSearch] = useState("");
+  const [albumSearch, setAlbumSearch] = useState("");
+
   const filmyPo2010 = filmy.filter((film) => film.rokProdukcji > 2010);
+
+  const filmyPrzefiltrowane = filmy.filter((film) =>
+    film.tytul.toLowerCase().includes(movieSearch.toLowerCase())
+  );
+
   const ksiazkiOdNajnowszej = [...ksiazki].sort(function(a, b) {
   return b.rokWydania - a.rokWydania;
   });
+
+  const ksiazkiPrzefiltrowane = ksiazki.filter((ksiazka) =>
+    ksiazka.tytul.toLowerCase().includes(bookSearch.toLowerCase())
+  );
+
+  const muzykaPrzefiltrowana = muzyka.filter((album) =>
+    album.nazwaAlbumu.toLowerCase().includes(albumSearch.toLowerCase()) ||
+    album.nazwaZespolu.toLowerCase().includes(albumSearch.toLowerCase())
+  );
+
   let albumNajwiecejUtworow = muzyka[0];
 
   muzyka.forEach((album) => {
@@ -231,17 +270,40 @@ function App() {
   return (
     <div className="container my-4">
       <Section title="Moje filmy">
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {filmy.map((film) => (
-            <Film
-              key={film.id}
-              okladka={film.okladka}
-              tytul={film.tytul}
-              rokProdukcji={film.rokProdukcji}
-              rating={film.rating}
-            />
-          ))}
+        <div className="mb-3">
+          <input
+            id="movie-search"
+            type="text"
+            className="form-control"
+            placeholder="Wpisz tytuł"
+            value={movieSearch}
+            onChange={(e) => {
+              setMovieSearch(e.target.value);
+              console.log(e.target.value);
+            }}
+          />
+          <small className="text-muted d-block mt-1">
+            Wpisany tekst: <strong>{movieSearch}</strong>
+          </small>
         </div>
+
+        {filmyPrzefiltrowane.length === 0 ? (
+          <div className="alert alert-danger" role="alert">
+            Nie znaleziono filmów
+          </div>
+        ) : (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {filmyPrzefiltrowane.map((film) => (
+              <Film
+                key={film.id}
+                okladka={film.okladka}
+                tytul={film.tytul}
+                rokProdukcji={film.rokProdukcji}
+                rating={film.rating}
+              />
+            ))}
+          </div>
+        )}
       </Section>
       <Section title="Filmy wydane po 2010 roku">
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -257,17 +319,40 @@ function App() {
         </div>
       </Section>
         <Section title="Moje książki od A do Z">
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {ksiazki.map((ksiazka) => (
-            <Ksiazka
-              key={ksiazka.id}
-              okladka={ksiazka.okladka}
-              tytul={ksiazka.tytul}
-              rokWydania={ksiazka.rokWydania}
-              liczbaStron={ksiazka.liczbaStron}
-            />
-          ))}
+        <div className="mb-3">
+          <input
+            id="book-search"
+            type="text"
+            className="form-control"
+            placeholder="Wpisz tytuł"
+            value={bookSearch}
+            onChange={(e) => {
+              setBookSearch(e.target.value);
+              console.log(e.target.value);
+            }}
+          />
+          <small className="text-muted d-block mt-1">
+            Wpisany tekst: <strong>{bookSearch}</strong>
+          </small>
         </div>
+
+        {ksiazkiPrzefiltrowane.length === 0 ? (
+          <div className="alert alert-danger" role="alert">
+            Nie znaleziono książek
+          </div>
+        ) : (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {ksiazkiPrzefiltrowane.map((ksiazka) => (
+              <Ksiazka
+                key={ksiazka.id}
+                okladka={ksiazka.okladka}
+                tytul={ksiazka.tytul}
+                rokWydania={ksiazka.rokWydania}
+                liczbaStron={ksiazka.liczbaStron}
+              />
+            ))}
+          </div>
+        )}
         </Section>
         <Section title="Książki posortowane od najnowszej">
         <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -283,19 +368,42 @@ function App() {
         </div>
         </Section>
         <Section title="Moja muzyka">
-        <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-          {muzyka.map((album) => (
-            <Muzyka
-              key={album.id}
-              okladka={album.okladka}
-              nazwaAlbumu={album.nazwaAlbumu}
-              nazwaZespolu={album.nazwaZespolu}
-              gatunek={album.gatunek}
-              rokWydania={album.rokWydania}
-              listaPiosenek={album.listaPiosenek}
-            />
-          ))}
+        <div className="mb-3">
+          <input
+            id="album-search"
+            type="text"
+            className="form-control"
+            placeholder="Wpisz tytuł"
+            value={albumSearch}
+            onChange={(e) => {
+              setAlbumSearch(e.target.value);
+              console.log(e.target.value);
+            }}
+          />
+          <small className="text-muted d-block mt-1">
+            Wpisany tekst: <strong>{albumSearch}</strong>
+          </small>
         </div>
+
+        {muzykaPrzefiltrowana.length === 0 ? (
+          <div className="alert alert-danger" role="alert">
+            Nie znaleziono albumów
+          </div>
+        ) : (
+          <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {muzykaPrzefiltrowana.map((album) => (
+              <Muzyka
+                key={album.id}
+                okladka={album.okladka}
+                nazwaAlbumu={album.nazwaAlbumu}
+                nazwaZespolu={album.nazwaZespolu}
+                gatunek={album.gatunek}
+                rokWydania={album.rokWydania}
+                listaPiosenek={album.listaPiosenek}
+              />
+            ))}
+          </div>
+        )}
         </Section>
 
       
@@ -313,9 +421,6 @@ function App() {
         </div>
       </Section>
     </div>
-    
-
-
   );
 }
 
